@@ -1,0 +1,205 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin - Product Manager</title>
+
+  <style>
+    body { font-family: Arial; background:#f4f7fb; padding:20px; }
+
+    .card {
+      max-width: 450px; margin: 20px auto; background:#fff;
+      padding:18px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,.06);
+    }
+
+    input, button {
+      width: 100%; padding:10px; margin-top:10px;
+      border-radius:8px; border:1px solid #ddd;
+    }
+
+    button { background:#27ae60; color:#fff; border:none; cursor:pointer; }
+
+    .product-box {
+      margin-top: 15px;
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    .actions button {
+      width: 48%;
+      padding: 8px;
+      margin-top: 8px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .edit-btn { background: #3498db; color: #fff; }
+    .del-btn { background: #e74c3c; color: #fff; }
+
+    #lastAddedBox {
+      margin-top:15px;
+      padding:10px;
+      background:#e8f5e9;
+      border-left:4px solid #27ae60;
+      border-radius:6px;
+      font-size:15px;
+      display:none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h2> Add / Manage Products</h2>
+
+    <input id="name" placeholder="Product name" />
+    <input id="price" type="number" placeholder="Price (₹)" />
+    <button id="addBtn">Add Product</button>
+    <div id="msg" style="margin-top:10px; color:#333; font-size:14px;"></div>
+
+    <!-- 🔥 NEW FEATURE: LAST ADDED PRODUCT -->
+    <div id="lastAddedBox"></div>
+
+    <h3 style="margin-top:20px;">🔍 Search Product</h3>
+    <input id="searchBox" placeholder="Type to search..." />
+
+    <h3 style="margin-top:20px;">📦 Product List </h3>
+    <div id="productList">Loading...</div>
+  </div>
+
+  <script type="module">
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { 
+      getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc 
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWx0KN8TDX-JT54AaGh97JrSDEpu14As8",
+      authDomain: "billing-280d5.firebaseapp.com",
+      projectId: "billing-280d5",
+      storageBucket: "billing-280d5.firebasestorage.app",
+      messagingSenderId: "303987512386",
+      appId: "1:303987512386:web:9666daaa922fac082649db",
+      measurementId: "G-1K1ZY7JRH2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const nameEl = document.getElementById('name');
+    const priceEl = document.getElementById('price');
+    const addBtn = document.getElementById('addBtn');
+    const msg = document.getElementById('msg');
+    const productList = document.getElementById('productList');
+    const searchBox = document.getElementById('searchBox');
+    const lastAddedBox = document.getElementById('lastAddedBox');
+
+    let allProducts = [];
+
+    // ========================
+    // ADD PRODUCT + Show Last Added
+    // ========================
+    addBtn.addEventListener('click', async () => {
+      const name = nameEl.value.trim();
+      const price = Number(priceEl.value);
+
+      if (!name) { msg.innerText = 'Product name required'; return; }
+      if (!price || price <= 0) { msg.innerText = 'Valid price required'; return; }
+
+      addBtn.disabled = true;
+      msg.innerText = 'Adding...';
+
+      try {
+        await addDoc(collection(db, "products"), { name, price });
+
+        // 🔥 UPDATE LAST ADDED PRODUCT
+        lastAddedBox.style.display = "block";
+        lastAddedBox.innerHTML = `<b>Last Added:</b> ${name} (₹${price})`;
+
+        msg.innerText = "Product added ✓";
+        nameEl.value = "";
+        priceEl.value = "";
+      } catch (err) {
+        msg.innerText = "Error: " + err.message;
+      }
+
+      addBtn.disabled = false;
+    });
+
+    // ========================
+    // LIVE PRODUCTS (SORT + SEARCH)
+    // ========================
+    onSnapshot(collection(db, "products"), (snap) => {
+      allProducts = [];
+
+      snap.forEach((docu) => {
+        allProducts.push({ id: docu.id, ...docu.data() });
+      });
+
+      allProducts.sort((a, b) => a.name.localeCompare(b.name));
+      showProducts();
+    });
+
+    function showProducts() {
+      const search = searchBox.value.toLowerCase();
+      productList.innerHTML = "";
+
+      let filtered = allProducts.filter(p =>
+        p.name.toLowerCase().includes(search)
+      );
+
+      if (filtered.length === 0) {
+        productList.innerHTML = "<p>No products found</p>";
+        return;
+      }
+
+      filtered.forEach((p) => {
+        productList.innerHTML += `
+          <div class="product-box">
+            <b>${p.name}</b><br>
+            Price: ₹${p.price}
+
+            <div class="actions">
+              <button class="edit-btn" onclick="editProduct('${p.id}', '${p.name}', ${p.price})">
+                Edit
+              </button>
+              <button class="del-btn" onclick="deleteProduct('${p.id}')">
+                Delete
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    searchBox.addEventListener("input", showProducts);
+
+    // DELETE
+    window.deleteProduct = async (id) => {
+      await deleteDoc(doc(db, "products", id));
+    };
+
+    // EDIT
+    window.editProduct = async (id, oldName, oldPrice) => {
+      const newName = prompt("Enter new product name:", oldName);
+      const newPrice = prompt("Enter new price:", oldPrice);
+
+      if (!newName || !newPrice) return;
+
+      await updateDoc(doc(db, "products", id), {
+        name: newName,
+        price: Number(newPrice)
+      });
+    };
+
+  </script>
+
+</body>
+</html>

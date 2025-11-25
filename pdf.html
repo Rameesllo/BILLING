@@ -1,0 +1,662 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Brilliant Event — Billing (with Discounts & Edit)</title>
+  <style>
+    :root{
+      --brand:#2b7cff;
+      --accent:#27ae60;
+      --muted:#7a7f86;
+      --card:#fff;
+      --bg:#eef3f8;
+    }
+    body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);padding:18px;color:#222}
+    .wrap{max-width:1000px;margin:12px auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(18,38,63,0.06)}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    h1{margin:0;font-size:20px;color:var(--brand)}
+    .meta{color:var(--muted);font-size:13px}
+    .row{display:flex;gap:10px;margin-top:12px}
+    input[type="text"], input[type="number"], input[type="date"], select{
+      flex:1;padding:10px;border-radius:8px;border:1px solid #e0e6ef;font-size:14px;
+    }
+    #searchBox{width:100%;padding:10px;border-radius:8px;border:1px solid #e0e6ef}
+    .card{background:#fbfdff;padding:12px;border-radius:10px;border:1px solid #f0f4fb}
+    .controls{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+    button{padding:10px 14px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-green{background:var(--accent);color:#fff}
+    .btn-dark{background:#34495e;color:#fff}
+    .btn-ghost{background:#fff;border:1px solid #dbe7ff;color:var(--brand)}
+    .suggest-list{position:absolute;left:0;right:0;background:#fff;border:1px solid #e6eefc;border-radius:8px;max-height:220px;overflow:auto;z-index:80;display:none}
+    .suggest-item{padding:10px;cursor:pointer;border-bottom:1px solid #f1f6ff}
+    .suggest-item:hover{background:#f7fbff}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:10px;border-bottom:1px solid #eef3f8;text-align:left;font-size:14px}
+    th{background:#f6fbff;color:var(--brand)}
+    .right{text-align:right}
+    .totals{margin-top:12px;padding:12px;background:#f9fff6;border-left:4px solid var(--accent);font-weight:700}
+    .small{font-size:13px;color:var(--muted)}
+    .saved-head{display:flex;justify-content:space-between;align-items:center;margin-top:22px}
+    .actions-row button{margin-right:6px}
+    .muted{color:var(--muted)}
+    .discount-row{display:flex;gap:8px;align-items:center}
+    .badge{background:#eef7ff;color:var(--brand);padding:6px 10px;border-radius:999px;font-weight:700}
+    /* responsive */
+    @media (max-width:720px){
+      .row{flex-direction:column}
+      .top{flex-direction:column;align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Brilliant Event — Billing</h1>
+        <div class="meta">Karuvankallu, Malappuram, Kerala • 📞 7034510537 • ✉ 123@gmail.com</div>
+      </div>
+      <div style="text-align:right">
+        <img src="/mnt/data/43674323-44df-49fd-b8fc-e031f40cc18d.jpg" alt="logo" style="height:64px;border-radius:8px;object-fit:cover">
+      </div>
+    </div>
+
+    <!-- form -->
+    <div class="card" style="margin-top:14px">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input id="customerName" type="text" placeholder="Customer name (required)">
+        <input id="customerPhone" type="text" placeholder="Customer phone (optional)" style="max-width:220px">
+        <input id="billNo" type="text" readonly style="max-width:220px">
+        <input id="billDate" type="date" style="max-width:180px">
+        <div class="badge">BE</div>
+      </div>
+
+      <!-- search -->
+      <div style="position:relative;margin-top:12px">
+        <input id="searchBox" placeholder=" product name to search " autocomplete="off">
+        <div class="suggest-list" id="suggestions"></div>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <input id="price" type="number" placeholder="Price" readonly style="max-width:170px">
+        <input id="qty" type="number" min="1" value="1" style="max-width:120px">
+        <button id="addItem" class="btn-primary">Add Item</button>
+
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <div class="discount-row">
+            <label class="muted">Discount:</label>
+            <select id="discountType" style="max-width:120px">
+              <option value="none">None</option>
+              <option value="percent">Percent (%)</option>
+              <option value="flat">Flat (₹)</option>
+            </select>
+            <input id="discountValue" type="number" placeholder="0" style="max-width:100px">
+          </div>
+        </div>
+      </div>
+
+      <!-- bill table -->
+      <table id="billTable" aria-label="bill table">
+        <thead>
+          <tr>
+            <th style="width:50%">Product</th>
+            <th style="width:15%">Price (₹)</th>
+            <th style="width:15%">Qty</th>
+            <th style="width:15%">Total (₹)</th>
+            <th style="width:5%">#</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:12px">
+        <div>
+          <div class="small">By brilliant</div>
+          <div class="small"></div>
+        </div>
+
+        <div style="min-width:300px">
+          <div class="totals" id="grandTotal">Subtotal: ₹0</div>
+          <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
+            <button id="saveBtn" class="btn-green">Save Bill</button>
+            <button id="pdfBtn" class="btn-dark">Download PDF</button>
+            <button id="resetBtn" class="btn-ghost">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- saved bills -->
+    <div class="saved-head">
+      <h2 style="margin:14px 0 0 0">Saved Bills</h2>
+      <div class="muted">Live list from Firestore</div>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <table id="savedBillsTable" style="width:100%">
+        <thead>
+          <tr>
+            <th>Bill No</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Total (₹)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script type="module">
+    // Firebase imports (modular)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, query, orderBy, onSnapshot, getDoc, doc, updateDoc, deleteDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+    // ---------- Firebase config ----------
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWx0KN8TDX-JT54AaGh97JrSDEpu14As8",
+      authDomain: "billing-280d5.firebaseapp.com",
+      projectId: "billing-280d5",
+      storageBucket: "billing-280d5.firebasestorage.app",
+      messagingSenderId: "303987512386",
+      appId: "1:303987512386:web:9666daaa922fac082649db",
+      measurementId: "G-1K1ZY7JRH2"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ---------- DOM ----------
+    const searchBox = document.getElementById('searchBox');
+    const suggestions = document.getElementById('suggestions');
+    const priceEl = document.getElementById('price');
+    const qtyEl = document.getElementById('qty');
+    const addItemBtn = document.getElementById('addItem');
+    const billTableBody = document.querySelector('#billTable tbody');
+    const grandTotalEl = document.getElementById('grandTotal');
+    const saveBtn = document.getElementById('saveBtn');
+    const pdfBtn = document.getElementById('pdfBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const customerNameEl = document.getElementById('customerName');
+    const customerPhoneEl = document.getElementById('customerPhone');
+    const billNoEl = document.getElementById('billNo');
+    const billDateEl = document.getElementById('billDate');
+    const savedBillsTbody = document.querySelector('#savedBillsTable tbody');
+    const discountTypeEl = document.getElementById('discountType');
+    const discountValueEl = document.getElementById('discountValue');
+
+    // ---------- constants ----------
+    const COMPANY = "Brilliant Event";
+    const ADDRESS = "Karuvankallu, Malappuram, Kerala";
+    const PHONE = "7034510537";
+    const EMAIL = "123@gmail.com";
+    const FOOTER_MSG = "Thanks for choosing Brilliant Event";
+    // developer provided local path (we'll fetch from same host). Use the path you uploaded.
+    const LOGO_PATH = "/mnt/data/43674323-44df-49fd-b8fc-e031f40cc18d.jpg";
+
+    // ---------- state ----------
+    let products = [];            // load from Firestore 'products'
+    let selectedProduct = null;   // selected from suggestions
+    let billItems = [];           // {name, price, qty, total}
+    let editingBillId = null;     // if not null => we're editing existing bill
+
+    // ---------- helpers ----------
+    function generateBillNo(){
+      const t = Date.now().toString();
+      return "BE-" + t.slice(-8);
+    }
+    billNoEl.value = generateBillNo();
+
+    (function setDefaultDate(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const dd = String(d.getDate()).padStart(2,'0');
+      billDateEl.value = `${yyyy}-${mm}-${dd}`;
+    })();
+
+    // ---------- load products live ----------
+    const productsQuery = query(collection(db, 'products'), orderBy('name'));
+    onSnapshot(productsQuery, snap => {
+      products = [];
+      snap.forEach(d => {
+        const data = d.data();
+        products.push({ id: d.id, name: data.name, price: Number(data.price) });
+      });
+    }, err => console.error('products load err', err));
+
+    // ---------- search suggestions ----------
+    searchBox.addEventListener('input', () => {
+      const qtxt = searchBox.value.trim().toLowerCase();
+      suggestions.innerHTML = '';
+      selectedProduct = null;
+      priceEl.value = '';
+      if (!qtxt) { suggestions.style.display = 'none'; return; }
+      const matches = products.filter(p => p.name.toLowerCase().includes(qtxt));
+      if (!matches.length) { suggestions.style.display = 'none'; return; }
+      matches.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'suggest-item';
+        div.textContent = `${m.name} — ₹${m.price}`;
+        div.onclick = () => {
+          searchBox.value = m.name;
+          priceEl.value = m.price;
+          selectedProduct = m;
+          suggestions.style.display = 'none';
+        };
+        suggestions.appendChild(div);
+      });
+      suggestions.style.display = 'block';
+    });
+    document.addEventListener('click', (e) => {
+      if (!suggestions.contains(e.target) && e.target !== searchBox) suggestions.style.display = 'none';
+    });
+
+    // ---------- add item ----------
+    addItemBtn.addEventListener('click', () => {
+      if (!selectedProduct) return alert('Please select a product from suggestions.');
+      const qty = Number(qtyEl.value) || 1;
+      const total = Number(selectedProduct.price) * qty;
+      billItems.push({ name: selectedProduct.name, price: Number(selectedProduct.price), qty, total });
+      renderBillTable();
+      
+      searchBox.value = "";
+  suggestions.innerHTML = "";
+  priceEl.value = "";
+  qtyEl.value = 1;
+      
+    });
+
+    // remove item by index
+    function removeItem(index){
+      billItems.splice(index,1);
+      renderBillTable();
+    }
+
+    // render bill table
+    function renderBillTable(){
+      billTableBody.innerHTML = '';
+      billItems.forEach((it, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${it.name}</td>
+          <td>₹${it.price}</td>
+          <td>${it.qty}</td>
+          <td>₹${it.total}</td>
+          <td class="right"><button class="btn-ghost" data-idx="${idx}" style="padding:6px 8px">Delete</button></td>
+        `;
+        billTableBody.appendChild(tr);
+      });
+      // attach delete handlers
+      billTableBody.querySelectorAll('button[data-idx]').forEach(btn => {
+        btn.addEventListener('click', () => removeItem(Number(btn.dataset.idx)));
+      });
+      updateGrandTotal();
+    }
+
+    // calculate totals with discount
+    function updateGrandTotal(){
+      const subtotal = billItems.reduce((s,i)=> s + Number(i.total), 0);
+      const dtype = discountTypeEl.value;
+      const dval = Number(discountValueEl.value) || 0;
+      let discountAmount = 0;
+      if (dtype === 'percent' && dval > 0) discountAmount = Math.round(subtotal * (dval/100));
+      else if (dtype === 'flat' && dval > 0) discountAmount = dval;
+      const grand = Math.max(0, subtotal - discountAmount);
+      grandTotalEl.innerText = `Subtotal: ₹${subtotal}  •  Discount: ₹${discountAmount}  →  Grand Total: ₹${grand}`;
+      return {subtotal, discountAmount, grand};
+    }
+    // recalc when discount changes
+    discountTypeEl.addEventListener('change', updateGrandTotal);
+    discountValueEl.addEventListener('input', updateGrandTotal);
+
+    // ---------- Save bill (create or update) ----------
+    saveBtn.addEventListener('click', async () => {
+      const cname = (customerNameEl.value || '').trim();
+      const cphone = (customerPhoneEl.value || '').trim();
+      const chosenDate = billDateEl.value;
+      if (!cname) return alert('Enter customer name.');
+      if (!chosenDate) return alert('Select date.');
+      if (billItems.length === 0) return alert('Add at least one item to the bill.');
+
+      saveBtn.disabled = true;
+      try {
+        const totals = updateGrandTotal();
+        const payload = {
+          billNo: billNoEl.value,
+          customerName: cname,
+          customerPhone: cphone,
+          chosenDate,
+          company: COMPANY,
+          items: billItems,
+          subtotal: totals.subtotal,
+          discount: totals.discountAmount,
+          grandTotal: totals.grand,
+          footer: FOOTER_MSG,
+          updatedAt: serverTimestamp()
+        };
+
+        if (editingBillId) {
+          // update existing
+          const docRef = doc(db, 'bills', editingBillId);
+          await updateDoc(docRef, payload);
+          alert('Bill updated ✓');
+          editingBillId = null;
+        } else {
+          // new bill
+          await addDoc(collection(db, 'bills'), {
+            ...payload,
+            createdAt: serverTimestamp()
+          });
+          alert('Bill saved ✓');
+        }
+
+        // reset UI
+        billItems = [];
+        renderBillTable();
+        customerNameEl.value = '';
+        customerPhoneEl.value = '';
+        discountTypeEl.value = 'none';
+        discountValueEl.value = '';
+        billNoEl.value = generateBillNo();
+        
+        
+        (function setDefaultDate(){ const d=new Date(); const yyyy=d.getFullYear(); const mm=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0'); billDateEl.value=`${yyyy}-${mm}-${dd}`; })();
+      } catch (err) {
+        console.error('save err', err);
+        alert('Save failed: ' + (err.message || err));
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    // ---------- Reset form ----------
+    resetBtn.addEventListener('click', () => {
+      if (!confirm('Reset the current bill form?')) return;
+      billItems = []; renderBillTable();
+      customerNameEl.value=''; customerPhoneEl.value=''; discountTypeEl.value='none'; discountValueEl.value=''; billNoEl.value=generateBillNo();
+      (function setDefaultDate(){ const d=new Date(); const yyyy=d.getFullYear(); const mm=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0'); billDateEl.value=`${yyyy}-${mm}-${dd}`; })();
+    });
+
+    // ---------- Load saved bills list (live) ----------
+    const billsQuery = query(collection(db, 'bills'), orderBy('createdAt', 'desc'));
+    onSnapshot(billsQuery, snap => {
+      savedBillsTbody.innerHTML = '';
+      snap.forEach(docSnap => {
+        const b = docSnap.data();
+        const id = docSnap.id;
+        let dateStr = b.chosenDate || '';
+        // simple row
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${b.billNo || ''}</td>
+          <td>${b.customerName || ''}</td>
+          <td>${dateStr}</td>
+          <td>₹${b.grandTotal || 0}</td>
+          <td>
+            <button class="btn-small" data-id="${id}" data-action="edit" style="margin-right:6px">Edit</button>
+            <button class="btn-small" data-id="${id}" data-action="view" style="margin-right:6px">View</button>
+            <button class="btn-small" data-id="${id}" data-action="pdf" style="margin-right:6px">PDF</button>
+            <button class="btn-small" data-id="${id}" data-action="delete" style="color:#b71c1c">Delete</button>
+          </td>
+        `;
+        savedBillsTbody.appendChild(tr);
+      });
+    }, err => console.error('bills load err', err));
+
+    // ---------- Click handlers for saved bills -->
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
+      if (!id || !action) return;
+
+      if (action === 'delete') {
+        if (!confirm('Delete this bill permanently?')) return;
+        try {
+          await deleteDoc(doc(db, 'bills', id));
+          alert('Deleted ✓');
+        } catch(err){ console.error(err); alert('Delete failed: ' + (err.message||err)); }
+        return;
+      }
+
+      
+
+      // load bill doc
+      try {
+        const snap = await getDoc(doc(db, 'bills', id));
+        if (!snap.exists()) return alert('Bill not found');
+        const bill = snap.data();
+
+        if (action === 'view') {
+          // simple view text
+          let text = `Bill No: ${bill.billNo}\nCustomer: ${bill.customerName}\nPhone: ${bill.customerPhone || ''}\nDate: ${bill.chosenDate || ''}\nTotal: ₹${bill.grandTotal}\n\nItems:\n`;
+          (bill.items || []).forEach(it => text += `${it.name} — ₹${it.price} x ${it.qty} = ₹${it.total}\n`);
+          alert(text);
+        } else if (action === 'edit') {
+          // populate form for editing
+          editingBillId = id;
+          customerNameEl.value = bill.customerName || '';
+          customerPhoneEl.value = bill.customerPhone || '';
+          billNoEl.value = bill.billNo || generateBillNo();
+          billDateEl.value = bill.chosenDate || billDateEl.value;
+          billItems = (bill.items || []).map(it => ({ name: it.name, price: Number(it.price), qty: Number(it.qty), total: Number(it.total) }));
+          // set discounts if saved
+          discountValueEl.value = bill.discount || '';
+          if (bill.discount && bill.subtotal){
+            // guess type: if discount equals percent of subtotal round - simple heuristic: if discount <= 100 and (subtotal*discount/100 approx equals bill.discount) -> percent
+            const percentGuess = Math.round((bill.discount / bill.subtotal) * 100);
+            if (Math.abs(Math.round(bill.subtotal * (percentGuess/100)) - bill.discount) <= 1 && percentGuess > 0 && percentGuess <= 100) {
+              discountTypeEl.value = 'percent';
+            } else {
+              discountTypeEl.value = 'flat';
+            }
+          } else discountTypeEl.value = 'none';
+          renderBillTable();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (action === 'pdf') {
+          await generatePdfFromBill(bill);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Failed: ' + (err.message || err));
+      }
+    });
+
+    // ---------- PDF generation (current bill) ----------
+    async function generatePdfFromBill(billObj){
+      // billObj: object (if coming from saved) or undefined (use current)
+      let items, billNo, customerName, cphone, chosenDate, subtotal, discountAmt, grandTotal;
+      if (billObj) {
+        items = billObj.items || [];
+        billNo = billObj.billNo || generateBillNo();
+        customerName = billObj.customerName || '';
+        cphone = billObj.customerPhone || '';
+        chosenDate = billObj.chosenDate || '';
+        subtotal = billObj.subtotal || items.reduce((s,i)=> s + Number(i.total), 0);
+        discountAmt = billObj.discount || 0;
+        grandTotal = billObj.grandTotal || subtotal - discountAmt;
+      } else {
+        items = billItems;
+        billNo = billNoEl.value;
+        customerName = customerNameEl.value || '';
+        cphone = customerPhoneEl.value || '';
+        chosenDate = billDateEl.value;
+        const t = updateGrandTotal();
+        subtotal = t.subtotal; discountAmt = t.discountAmount; grandTotal = t.grand;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit:'pt', format:'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      // load logo base64
+      async function loadLogo(){
+        try {
+          const res = await fetch(LOGO_PATH);
+          const blob = await res.blob();
+          return await new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          });
+        } catch(e){
+          console.warn('logo load failed', e);
+          return null;
+        }
+      }
+      const logoBase64 = await loadLogo();
+
+      // dotted border: we draw short segments around edges for eye-catching border
+      function drawDottedBorder(){
+        const gap = 6;
+        const seg = 8;
+        doc.setDrawColor(200);
+        doc.setLineWidth(0.8);
+        // top
+        for(let x=30;x<pageWidth-30;x+=seg+gap) {
+          doc.line(x, 30, Math.min(x+seg, pageWidth-30), 30);
+        }
+        // bottom
+        for(let x=30;x<pageWidth-30;x+=seg+gap) {
+          doc.line(x, pageHeight-30, Math.min(x+seg, pageWidth-30), pageHeight-30);
+        }
+        // left
+        for(let y=30;y<pageHeight-30;y+=seg+gap) {
+          doc.line(30, y, 30, Math.min(y+seg, pageHeight-30));
+        }
+        // right
+        for(let y=30;y<pageHeight-30;y+=seg+gap) {
+          doc.line(pageWidth-30, y, pageWidth-30, Math.min(y+seg, pageHeight-30));
+        }
+      }
+
+      drawDottedBorder();
+
+      // header area
+      let left = 48;
+      let y = 48;
+
+      if (logoBase64) {
+        doc.addImage(logoBase64, 'JPEG', left, y, 90, 60);
+      }
+
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(COMPANY, left + 110, y + 16);
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(ADDRESS, left + 110, y + 34);
+      doc.text(`Phone: ${PHONE}   Email: ${EMAIL}`, left + 110, y + 50);
+
+    
+     
+
+
+
+doc.setDrawColor(220);
+doc.setFillColor(245,250,255);
+
+const boxW = 210;
+const boxLeft = pageWidth - left - boxW;
+
+doc.rect(boxLeft, y, boxW, 48, 'F');
+
+doc.setFontSize(11);
+doc.setTextColor(40);
+
+doc.text(`Bill No: ${billNo}`, boxLeft + 10, y + 16);
+doc.text(`Date: ${chosenDate}`, boxLeft + 10, y + 33);
+
+y += 90;
+
+
+
+
+      // customer info
+      doc.setFontSize(12);
+      doc.setTextColor(30);
+      doc.text(`Bill To: ${customerName}`, left, y);
+      if (cphone) doc.text(`Phone: ${cphone}`, left + 250, y);
+      y += 18;
+
+      // table header - styled row
+      doc.setFillColor(241,246,251);
+      doc.rect(left - 6, y - 12, pageWidth - (left*2) + 12, 22, 'F');
+      doc.setFontSize(11);
+      const colX = [left, left + 300, left + 380, left + 460];
+      doc.setTextColor(30);
+      doc.text('Product', colX[0], y);
+      doc.text('Price', colX[1], y);
+      doc.text('Qty', colX[2], y);
+      doc.text('Total', colX[3], y);
+      y += 10;
+
+      // table rows
+      doc.setFont('helvetica','normal');
+      items.forEach(it => {
+        y += 18;
+        if (y > pageHeight - 120) { doc.addPage(); y = 48; drawDottedBorder(); }
+        doc.text(String(it.name), colX[0], y);
+        doc.text(String(it.price), colX[1], y);
+        doc.text(String(it.qty), colX[2], y);
+        doc.text(String(it.total), colX[3], y);
+      });
+
+      // totals box (right)
+      const totalsTop = y + 22;
+      doc.setFontSize(11);
+      doc.setFont('helvetica','bold');
+      doc.text('Subtotal:', colX[2], totalsTop);
+      doc.text('₹' + subtotal, colX[3], totalsTop, { align:'left' });
+      doc.setFont('helvetica','normal');
+      doc.text('Discount:', colX[2], totalsTop + 16);
+      doc.text('₹' + discountAmt, colX[3], totalsTop + 16, { align:'left' });
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(13);
+      doc.text('Grand Total:', colX[2], totalsTop + 36);
+      doc.text('₹' + grandTotal, colX[3], totalsTop + 36, { align:'left' });
+
+      // signature & footer
+      let sigY = totalsTop + 86;
+      doc.setFontSize(11);
+      doc.text('Signature:', left, sigY);
+      doc.line(left + 70, sigY + 2, left + 260, sigY + 2);
+      doc.setFontSize(10);
+      doc.text(FOOTER_MSG, pageWidth/2, pageHeight - 40, { align:'center' });
+
+      // save
+      doc.save(`Invoice_${billNo}.pdf`);
+    }
+
+    // wrapper to generate PDF for current state
+    async function generatePdfFromCurrent(){
+      const totals = updateGrandTotal();
+      if (billItems.length === 0) return alert('Add items first');
+      const billObj = {
+        items: billItems,
+        billNo: billNoEl.value,
+        customerName: customerNameEl.value || '',
+        customerPhone: customerPhoneEl.value || '',
+        chosenDate: billDateEl.value,
+        subtotal: totals.subtotal,
+        discount: totals.discountAmount,
+        grandTotal: totals.grand
+      };
+      await generatePdfFromBill(billObj);
+    }
+    pdfBtn.addEventListener('click', generatePdfFromCurrent);
+
+    
+  </script>
+</body>
+</html>

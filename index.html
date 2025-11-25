@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Navigation</title>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+
+<script>
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js")
+    .then(() => console.log("SW Registered"))
+    .catch(err => console.log("SW Error", err));
+}
+</script>
+
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            height: 100vh;
+            background:
+                linear-gradient(135deg, rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+                url("a.jpg") no-repeat center center fixed;
+            background-size: cover;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 30px 20px;
+            transition: 0.4s;
+            position: fixed;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 999;
+        }
+
+        /* Hidden on mobile */
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .toggle-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 45px;
+            height: 45px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.55);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .nav-item {
+            padding: 18px 22px;
+            margin: 12px 0;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.10);
+            cursor: pointer;
+            transition: 0.4s;
+        }
+
+        .nav-item:hover { background: rgba(255,255,255,0.30); }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 280px;
+            transition: 0.3s;
+        }
+
+        /* Mobile pushes content full width */
+        .sidebar.collapsed + .main-content {
+            margin-left: 0;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.80);
+            padding: 30px;
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin-top: 330px;
+            margin-left: px; ;
+        }
+
+        .btn-box {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            background: #1e3c72;
+            color: white;
+            padding: 14px 22px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            flex: 1;
+            min-width: 100px;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            background: #764ba2;
+        }
+
+        /* ---------------- MOBILE OPTIMIZATION ---------------- */
+        @media (max-width: 768px) {
+
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .btn {
+                font-size: 15px;
+                padding: 12px 18px;
+                flex-basis: 100%;
+            }
+
+            .nav-item {
+                font-size: 17px;
+                padding: 16px;
+            }
+        }
+
+        /* Small Phones */
+        @media (max-width: 480px) {
+            h1 { font-size: 22px; }
+            p  { font-size: 15px; }
+
+            .btn {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+
+            .toggle-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOGGLE BUTTON -->
+    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar collapsed" id="sidebar">
+        <h2></h2>
+
+        <div class="nav-item" onclick="goTo('home.html')">Home</div>
+        <div class="nav-item" onclick="goTo('settings.html')">Settings</div>
+        <div class="nav-item" onclick="goTo('employee.html')">Employee</div>
+        <div class="nav-item" onclick="goTo('login.html')">Admin</div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content" id="content">
+        <div class="card">
+            <h1></h1>
+            <p></p>
+
+            <div class="btn-box">
+                <button class="btn" onclick="goTo('pdf.html')">Bill</button>
+                <button class="btn" onclick="goTo('page2.html')">Details</button>
+                <button class="btn" onclick="goTo('login.html')">Admin</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    function toggleSidebar() {
+        const side = document.getElementById("sidebar");
+        side.classList.toggle("collapsed");
+    }
+
+    function goTo(page) {
+        window.location.href = page;
+    }
+</script>
+
+</body>
+</html>

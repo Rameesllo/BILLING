@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login - Brilliant Event</title>
+<style>
+  /* Reset */
+  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+
+  body, html {
+    height: 100%;
+    background-color: #f4f6f8; /* standard light gray */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login-container {
+    background: #ffffff; /* white card */
+    padding: 40px 30px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1); /* subtle shadow */
+    text-align: center;
+    position: relative;
+  }
+
+  .login-container h1 {
+    color: #2b7cff; /* brand color */
+    margin-bottom: 20px;
+  }
+
+  .input-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  .input-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .input-group input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    transition: border-color 0.2s;
+  }
+
+  .input-group input:focus {
+    outline: none;
+    border-color: #2b7cff;
+  }
+
+  .btn-login {
+    width: 100%;
+    padding: 12px;
+    background: #2b7cff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .btn-login:hover {
+    background: #1a5fcc;
+  }
+
+  .error-msg {
+    color: #b71c1c;
+    margin-top: 10px;
+    font-size: 14px;
+    display: none;
+  }
+
+  .success-msg {
+    color: #27ae60;
+    margin-top: 10px;
+    font-size: 14px;
+    display: none;
+  }
+
+  .footer-text {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>Admin Login</h1>
+    <div class="input-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="Enter email" required>
+    </div>
+    <div class="input-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter password" required>
+    </div>
+    <button class="btn-login" id="loginBtn">Login</button>
+    <div class="error-msg" id="errorMsg">Invalid email or password!</div>
+    <div class="success-msg" id="successMsg">Login successful! Redirecting...</div>
+    <div class="footer-text">© 2025 Brilliant Event</div>
+  </div>
+
+<script>
+  const loginBtn = document.getElementById('loginBtn');
+  const errorMsg = document.getElementById('errorMsg');
+  const successMsg = document.getElementById('successMsg');
+
+  loginBtn.addEventListener('click', () => {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    // Preset credentials
+    const adminEmail = 'admin@gmail.com';
+    const adminPass = '1234567890';
+
+    if(email === adminEmail && password === adminPass) {
+      errorMsg.style.display = 'none';
+      successMsg.style.display = 'block';
+      setTimeout(() => {
+        // Redirect to admin dashboard (change this URL as needed)
+        window.location.href = 'add_product.html';
+      }, 1200);
+    } else {
+      successMsg.style.display = 'none';
+      errorMsg.style.display = 'block';
+    }
+  });
+</script>
+</body>
+</html>
