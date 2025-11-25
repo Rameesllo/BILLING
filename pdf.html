@@ -4,51 +4,191 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Brilliant Event — Billing (with Discounts & Edit)</title>
+
   <style>
-    :root{
-      --brand:#2b7cff;
-      --accent:#27ae60;
-      --muted:#7a7f86;
-      --card:#fff;
-      --bg:#eef3f8;
-    }
-    body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);padding:18px;color:#222}
-    .wrap{max-width:1000px;margin:12px auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(18,38,63,0.06)}
-    .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
-    h1{margin:0;font-size:20px;color:var(--brand)}
-    .meta{color:var(--muted);font-size:13px}
-    .row{display:flex;gap:10px;margin-top:12px}
-    input[type="text"], input[type="number"], input[type="date"], select{
-      flex:1;padding:10px;border-radius:8px;border:1px solid #e0e6ef;font-size:14px;
-    }
-    #searchBox{width:100%;padding:10px;border-radius:8px;border:1px solid #e0e6ef}
-    .card{background:#fbfdff;padding:12px;border-radius:10px;border:1px solid #f0f4fb}
-    .controls{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-    button{padding:10px 14px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
-    .btn-primary{background:var(--brand);color:#fff}
-    .btn-green{background:var(--accent);color:#fff}
-    .btn-dark{background:#34495e;color:#fff}
-    .btn-ghost{background:#fff;border:1px solid #dbe7ff;color:var(--brand)}
-    .suggest-list{position:absolute;left:0;right:0;background:#fff;border:1px solid #e6eefc;border-radius:8px;max-height:220px;overflow:auto;z-index:80;display:none}
-    .suggest-item{padding:10px;cursor:pointer;border-bottom:1px solid #f1f6ff}
-    .suggest-item:hover{background:#f7fbff}
-    table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{padding:10px;border-bottom:1px solid #eef3f8;text-align:left;font-size:14px}
-    th{background:#f6fbff;color:var(--brand)}
-    .right{text-align:right}
-    .totals{margin-top:12px;padding:12px;background:#f9fff6;border-left:4px solid var(--accent);font-weight:700}
-    .small{font-size:13px;color:var(--muted)}
-    .saved-head{display:flex;justify-content:space-between;align-items:center;margin-top:22px}
-    .actions-row button{margin-right:6px}
-    .muted{color:var(--muted)}
-    .discount-row{display:flex;gap:8px;align-items:center}
-    .badge{background:#eef7ff;color:var(--brand);padding:6px 10px;border-radius:999px;font-weight:700}
-    /* responsive */
-    @media (max-width:720px){
-      .row{flex-direction:column}
-      .top{flex-direction:column;align-items:flex-start}
-    }
-  </style>
+  :root{
+    --brand:#2b7cff;
+    --accent:#27ae60;
+    --muted:#7a7f86;
+    --card:#fff;
+    --bg:#eef3f8;
+  }
+
+  body{
+    font-family:Inter,Arial,Helvetica,sans-serif;
+    background:var(--bg);
+    padding:12px;
+    color:#222;
+  }
+
+  /* Main container becomes phone-friendly */
+  .wrap{
+    max-width:480px;
+    margin:10px auto;
+    background:var(--card);
+    padding:14px;
+    border-radius:12px;
+    box-shadow:0 8px 30px rgba(18,38,63,0.06);
+  }
+
+  /* Logo + heading for phone */
+  .top{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    text-align:center;
+  }
+  .top img{
+    width:70px;
+    height:auto;
+  }
+
+  h1{
+    font-size:18px;
+    margin:0;
+    color:var(--brand);
+  }
+
+  .meta{
+    color:var(--muted);
+    font-size:11px;
+  }
+
+  /* Input rows → full width on phone */
+  .row{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:10px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #e0e6ef;
+    font-size:14px;
+  }
+
+  #searchBox{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    border-radius:8px;
+    border:1px solid #e0e6ef;
+  }
+
+  .card{
+    background:#fbfdff;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #f0f4fb;
+  }
+
+  /* Buttons become full-width stacked */
+  .controls{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:12px;
+  }
+
+  button{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    font-weight:700;
+    font-size:14px;
+  }
+
+  .btn-primary{background:var(--brand);color:#fff}
+  .btn-green{background:var(--accent);color:#fff}
+  .btn-dark{background:#34495e;color:#fff}
+  .btn-ghost{background:#fff;border:1px solid #dbe7ff;color:var(--brand)}
+
+  /* Suggestions dropdown */
+  .suggest-list{
+    position:absolute;
+    left:0;
+    right:0;
+    background:#fff;
+    border:1px solid #e6eefc;
+    border-radius:8px;
+    max-height:220px;
+    overflow:auto;
+    z-index:80;
+    display:none;
+  }
+  .suggest-item{
+    padding:10px;
+    cursor:pointer;
+    border-bottom:1px solid #f1f6ff;
+  }
+  .suggest-item:hover{background:#f7fbff}
+
+  /* Table responsive */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:12px;
+    font-size:12px;
+  }
+
+  th,td{
+    padding:8px;
+    border-bottom:1px solid #eef3f8;
+  }
+
+  th{
+    background:#f6fbff;
+    color:var(--brand);
+    font-size:11px;
+  }
+
+  .right{text-align:right}
+
+  .totals{
+    margin-top:12px;
+    padding:12px;
+    font-size:14px;
+    background:#f9fff6;
+    border-left:4px solid var(--accent);
+    font-weight:700;
+  }
+
+  .small{font-size:12px;color:var(--muted)}
+
+  /* Saved bills */
+  .saved-head{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    margin-top:20px;
+  }
+
+  .badge{
+    background:#eef7ff;
+    color:var(--brand);
+    padding:6px 10px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:12px;
+  }
+
+  /* Mobile adjustments */
+  @media(max-width:480px){
+    .actions-row{display:flex;flex-direction:column;gap:8px}
+  }
+</style>
+
+
 </head>
 <body>
   <div class="wrap">
